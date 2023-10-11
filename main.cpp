@@ -1,3 +1,4 @@
+#include "PinNames.h"
 #include "mbed.h"
 #include "nRF24L01P.h"
 
@@ -5,8 +6,8 @@ Serial pc(USBTX, USBRX); // tx, rx
 
 nRF24L01P my_nrf24l01p(PTD2, PTD3, PTC5, PTD0, PTD5, PTA13);    // mosi, miso, sck, csn, ce, irq
 
-DigitalOut myled1(LED1);
-DigitalOut myled2(LED2);
+DigitalOut myled1(LED_GREEN);
+DigitalOut myled2(LED_RED);
 
 // main() runs in its own thread in the OS
 int main()
@@ -14,7 +15,7 @@ int main()
     // The nRF24L01+ supports transfers from 1 to 32 bytes, but Sparkfun's
 //  "Nordic Serial Interface Board" (http://www.sparkfun.com/products/9019)
 //  only handles 4 byte transfers in the ATMega code.
-#define TRANSFER_SIZE   4
+#define TRANSFER_SIZE   5
 
     char txData[TRANSFER_SIZE], rxData[TRANSFER_SIZE];
     int txDataCnt = 0;
@@ -22,7 +23,6 @@ int main()
 
     my_nrf24l01p.powerUp();
 
-    // Display the (default) setup of the nRF24L01+ chip
     pc.printf( "nRF24L01+ Frequency    : %d MHz\r\n",  my_nrf24l01p.getRfFrequency() );
     pc.printf( "nRF24L01+ Output power : %d dBm\r\n",  my_nrf24l01p.getRfOutputPower() );
     pc.printf( "nRF24L01+ Data Rate    : %d kbps\r\n", my_nrf24l01p.getAirDataRate() );
@@ -31,9 +31,10 @@ int main()
 
     pc.printf( "Type keys to test transfers:\r\n  (transfers are grouped into %d characters)\r\n", TRANSFER_SIZE );
 
-    my_nrf24l01p.setTransferSize(TRANSFER_SIZE, TRANSFER_SIZE);
-
-    my_nrf24l01p.setReceiveMode();
+    my_nrf24l01p.setTransferSize(TRANSFER_SIZE);
+    
+    my_nrf24l01p.setTransmitMode();
+    my_nrf24l01p.disableAutoRetransmit();
     my_nrf24l01p.enable();
 
     while (1) {
@@ -58,7 +59,7 @@ int main()
         }
 
         // If we've received anything in the nRF24L01+...
-        if ( my_nrf24l01p.readable() ) {
+        /*if ( my_nrf24l01p.readable() ) {
 
             // ...read the data into the receive buffer
             rxDataCnt = my_nrf24l01p.read( NRF24L01P_PIPE_P0, rxData, sizeof( rxData ) );
@@ -71,7 +72,7 @@ int main()
 
             // Toggle LED2 (to help debug nRF24L01+ -> Host communication)
             myled2 = !myled2;
-        }
+        }*/
     }
 }
 
